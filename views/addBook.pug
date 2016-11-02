@@ -1,0 +1,22 @@
+extends layout
+
+block content
+  main
+    aside
+      form(method='POST' action='/addBook')
+        div
+          label(for='bookTitle') Book Title:
+          input#bookTitle(type='text', placeholder='first and last' name='bookTitle')
+        div
+          label(for='email') Email:
+          input#email(type='email', placeholder='name@email.com' name='email')
+        div
+          label(for='favoriteBook') Favorite Book:
+          input#favoriteBook(type='text', placeholder='title of book' name='favoriteBook')
+        div
+          label(for='pw') Password:
+          input#pw(type='password' name='password')
+        div
+          label(for='pw2') Confirm Password:
+          input#pw2(type='password' name='confirmPassword')
+        button(type='submit') Sign up
