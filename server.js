@@ -4,13 +4,11 @@ var path = require('path');
 var bodyParser = require('body-parser');
 var router = express.Router();
 var methodOverride = require('method-override');
-// var mongoose = require('mongoose');
-// mongoose.Promise = require('bluebird');
-// var db = mongoose.connection;
+
 const databaseName = 'librarian'
 const connectionString = `postgres://${process.env.USER}@localhost:5432/${databaseName}`
 const pgp = require('pg-promise')()
-const db = pgp(connectionString)
+const db = pgp( connectionString )
 
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -20,100 +18,71 @@ app.use('/', router);
 app.set('view engine', 'pug');
 app.use(express.static(path.join(__dirname, 'public')));
 
-// INIT DB
-// var mongoURI = 'mongodb://localhost/bookstoredemo';
-// mongoose.connect(mongoURI);
+const addBook = `insert into books( title, description, image_url ) values( $1, $2, $3 ) returning id`
+const getBookById = 'select title, description, image_url from books where id = $1'
+const getAllBooks = 'select * from books'
+const getAllAuthors = 'select * from authors'
+
+const insertBookAuthor = 'insert into book_authors( book_id, author_id ) values ( $1, $2 )'
+
+//Book routes
 
 router.get('/', function (req, res, next) {
-  res.render('index', {});
+  db.any( getAllBooks ).then( books => {
+    res.render('index', { books } )
+  })
 });
 
 router.get('/addBook', function (req, res, next) {
-  res.render('addBook', {});
+  db.any( getAllAuthors ).then( authors => {
+    res.render('addBook', { authors })
+  })
 });
 
-router.post('/addBook', function (req, res, next) {
-  //let id = req.body.id;
-  const { id, title, description, image_url } = req.body;
-  db
-    .none(`insert into books(id, title, description, image_url)
-           values( ${id}, ${title}, ${description}, ${image_url}`)
-    .then(function() {
-      //success!
-    })
-    .catch(function() {
-      //failure!
-      console.error("I failed")
-    })
+router.post('/addBook', function (req, res) {
+  const { title, description, image_url, author_id } = req.body
+
+  console.log( req.body );
+
+  db.oneOrNone( addBook, [ title, description, image_url ])
+    .then(function( book ) {
+
+      db.none( insertBookAuthor, [ book.id, author_id ] )
+        .then( () => {
+          res.redirect( `/book-details/${book.id}` )
+        })
+      })
 })
 
-// db.manyOrNone('open', function () {
-//   //console.log('MONGOOSE CONNECTED!');
-//   var Book = require('./app/models/book');
-//
-//   router
-//
-//   .get('/', function (req, res, next) {
-//     Book.find(function (err, books, count) {
-//       res.render('index', { books: books });
-//     });
-//   })
-//
-//   .get('/api/books', function (req, res, next) {
-//     Book.find(function (err, books, count) {
-//       res.render('index', { books: books });
-//     });
-//   })
-//
-//   .get('/add/books', function (req, res, next) {
-//     res.render('addBook', {});
-//   })
-//
-//   .post('/api/books/:title', function (req, res, next) {
-//     console.log('POSTING BOOKS')
-//     var book = new Book({
-//       title: req.params.title
-//     });
-//
-//     book.save()
-//       .then(function (book) {
-//         res.json(201, book);
-//       })
-//       .catch(function (err) {
-//         return next(err);
-//       });
-//   })
-//
-//   // .put('/api/books/:title', function (req, res, next) {
-//   //   res.json({ message: 'updating the book' });
-//   // });
-//
-//   .delete('/api/books/:id', function (req, res) {
-//     Book.remove({ _id: req.params.id }, function (err, book) {
-//       if (err) { res.send(err); }
-//       res.json({ message: 'DONE!' });
-//     });
-//     // Book.findById(req.params.id, function (err, book) {
-//     //   console.log('About to remove', book);
-//     //   book.remove(function (err, removedBook) {
-//     //     console.log('Success', removedBook);
-//     //   });
-//     // });
-//   });
-//
-//   // TODO:
-//   // [ ] update an existing book using .put()
-//   // [ ] delete an existing book using .delete()
-// });
+router.get('/book-details/:book_id', function( req, res ) {
+  const { book_id } = req.params
 
-// router.get('/', function (req, res) {
-//   res.json({ message: 'We are the best' });
-// });
-//
-// router.get('/books', function (req, res) {
-//   res.json({ message: 'Books go here' });
-// });
+  db.oneOrNone( getBookById, [ book_id ] )
+    .then(function( book ) {
+        res.render( 'book_details', { book } )
+      })
+})
 
-app.listen(8080);
+// --------------------------------------------------------------------------------------------------------
 
-console.log('Magic happens on port ' + 8080);
+// author routes
+const addAuthor = `insert into authors( name, description, image_url ) values( $1, $2, $3 ) returning id`
+
+router.get('/addAuthor', function ( req, res ) {
+  res.render('addAuthor')
+})
+
+router.post('/addAuthor', function ( req, res ) {
+  const { name, description, image_url } = req.body
+
+  db.oneOrNone( addAuthor, [ name, description, image_url ])
+    .then(function( author ) {
+        res.json( { author } )
+        // res.redirect( `/author-details/${author.id}` )
+      })
+})
+
+
+app.listen( 8080 )
+
+console.log('Magic happens on port ' + 8080)

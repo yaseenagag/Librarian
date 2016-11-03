@@ -4,6 +4,7 @@ background: url(http://www.planwallpaper.com/static/images/518079-background-hd.
 -moz-background-size: cover;
 -o-background-size: cover;
 background-size: cover;
+color: white;
 }
 
 .sidebar {

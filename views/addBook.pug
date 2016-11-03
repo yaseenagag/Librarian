@@ -5,18 +5,18 @@ block content
     aside
       form(method='POST' action='/addBook')
         div
-          label(for='bookTitle') Book Title:
-          input#bookTitle(type='text', placeholder='first and last' name='bookTitle')
+          label(for='title') Book Title:
+          input#bookTitle(type='text', placeholder='Title' name='title')
         div
-          label(for='email') Email:
-          input#email(type='email', placeholder='name@email.com' name='email')
+          label(for='description') Description:
+          input#description(type='text', placeholder='description' name='description')
         div
-          label(for='favoriteBook') Favorite Book:
-          input#favoriteBook(type='text', placeholder='title of book' name='favoriteBook')
+          label(for='image_url') Favorite Book:
+          input#imageUrl(type='text', placeholder='Image Url' name='image_url')
         div
-          label(for='pw') Password:
-          input#pw(type='password' name='password')
-        div
-          label(for='pw2') Confirm Password:
-          input#pw2(type='password' name='confirmPassword')
-        button(type='submit') Sign up
+          label(for='Select a Name')
+            select( name='author_id' )
+              for author in authors
+                option(value=author.id)=author.name
+
+        button(type='submit') Submit

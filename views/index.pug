@@ -20,3 +20,7 @@ block content
             label
               input(type='radio', value='byGenre', name='type')
               i Genres
+  for book in books
+    a( href='/book-details/' + book.id )
+      h4=book.title
+      p=book.description

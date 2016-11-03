@@ -1,0 +1,16 @@
+extends layout
+
+block content
+  main
+    aside
+      form(method='POST' action='/addAuthor')
+        div
+          label(for='name') Author Title:
+          input#bookTitle(type='text', placeholder='Name' name='name')
+        div
+          label(for='description') Description:
+          input#description(type='text', placeholder='description' name='description')
+        div
+          label(for='image_url') Image_Url :
+          input#imageUrl(type='text', placeholder='Image Url' name='image_url')
+        button(type='submit') Submit
