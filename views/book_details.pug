@@ -4,5 +4,7 @@ block content
   div
     h4=book.title
     p=book.description
+    a.btn.btn-success( type="button" href='/updateBook/' + book.id ) updateBook
+    a.btn.btn-danger( href='/deleteBook/' + book.id ) Delete Book
     div
       img( src=book.image_url )

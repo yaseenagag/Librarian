@@ -1,0 +1,17 @@
+extends layout
+
+block content
+  main
+    aside
+      form(method='POST' action='/updateBook')
+        div
+          label(for='name') Book Title:
+          input#bookTitle(type='text', value=book.title name='title')
+        div
+          label(for='description') Book Description:
+          input#bookTitle(type='text', value=book.description name='description')  
+        div
+          label(for='image_url') Image_Url :
+          input#imageUrl(type='text', value=book.image_url name='image_url')
+          input(type="hidden", name="book_id" value=book.id)
+        button(type='submit') Submit

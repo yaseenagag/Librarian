@@ -19,11 +19,13 @@ app.set('view engine', 'pug');
 app.use(express.static(path.join(__dirname, 'public')));
 
 const addBook = `insert into books( title, description, image_url ) values( $1, $2, $3 ) returning id`
-const getBookById = 'select title, description, image_url from books where id = $1'
+const getBookById = 'select * from books where id = $1'
 const getAllBooks = 'select * from books'
 const getAllAuthors = 'select * from authors'
 
 const insertBookAuthor = 'insert into book_authors( book_id, author_id ) values ( $1, $2 )'
+const updateBook = 'UPDATE books SET title = $1, description = $2, image_url = $3 WHERE id = $4 RETURNING id'
+const deleteBook = 'DELETE FROM books WHERE id = $1'
 
 //Book routes
 
@@ -63,6 +65,27 @@ router.get('/book-details/:book_id', function( req, res ) {
       })
 })
 
+router.get('/updateBook/:book_id', function ( req, res ) {
+  const { book_id } = req.params
+
+  db.oneOrNone( getBookById, [ book_id ] )
+    .then( book => res.render( 'updateBook', { book } ) )
+})
+
+router.post('/updateBook', function ( req, res ) {
+  const { book_id, title, description, image_url } = req.body
+
+  console.log( 'Updated Books', req.body )
+
+  db.oneOrNone( updateBook, [ title, description, image_url, book_id ] )
+    .then( book => res.redirect( `/book-details/${book.id}` ) )
+})
+
+router.get('/deleteBook/:book_id', function ( req, res ) {
+  const { book_id } = req.params
+  db.none( deleteBook, [ book_id ] ).then(() => res.redirect( '/' ) )
+})
+
 // --------------------------------------------------------------------------------------------------------
 
 // author routes
@@ -83,6 +106,6 @@ router.post('/addAuthor', function ( req, res ) {
 })
 
 
-app.listen( 8080 )
+app.listen( 3000 )
 
-console.log('Magic happens on port ' + 8080)
+console.log('Magic happens on port ' + 3000)
