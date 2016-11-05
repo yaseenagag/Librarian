@@ -17,6 +17,10 @@ color: white;
 
 }
 
+.form {
+  padding: 30px;
+}
+
 .top-bar {
   padding-right: 10px;
   text-decoration: none;
@@ -26,6 +30,10 @@ color: white;
   list-style: none;
   margin: 0px;
   padding: 0px;
+}
+
+.formtype {
+  padding-right: 20px;
 }
 
 button {
