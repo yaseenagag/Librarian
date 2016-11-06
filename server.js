@@ -20,8 +20,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const addBook = `insert into books( title, description, image_url ) values( $1, $2, $3 ) returning id`
 const getBookById = 'select * from books where id = $1'
+const getAuthorById = 'select * from authors where id = $1'
 const getAllBooks = 'select * from books'
 const getAllAuthors = 'select * from authors'
+const getAuthorByBookId = 'select * from book_authors where book_id = $1'
 
 const insertBookAuthor = 'insert into book_authors( book_id, author_id ) values ( $1, $2 )'
 const updateBook = 'UPDATE books SET title = $1, description = $2, image_url = $3 WHERE id = $4 RETURNING id'
@@ -59,9 +61,24 @@ router.post('/addBook', function (req, res) {
 router.get('/book-details/:book_id', function( req, res ) {
   const { book_id } = req.params
 
-  db.oneOrNone( getBookById, [ book_id ] )
-    .then(function( book ) {
-        res.render( 'book_details', { book } )
+  Promise.all([
+    db.oneOrNone( getBookById, [ book_id ] ),
+    db.oneOrNone( getAuthorByBookId, [ book_id ] )
+  ]).then( results => {
+    const [ book, book_author ] = results
+    // const book = results[0]
+    // const book_author = results[1]
+    Promise.resolve( db.oneOrNone( getAuthorById, [ book_author.author_id ] ) )
+      .then( author => res.render( 'book_details', { book, author } ) )
+  })
+})
+
+router.get('/author-details/:author_id', function( req, res ) {
+  const { author_id } = req.params
+
+  db.oneOrNone( getAuthorById, [ author_id ] )
+    .then(function( author ) {
+        res.render( 'author_details', { author } )
       })
 })
 
@@ -100,8 +117,7 @@ router.post('/addAuthor', function ( req, res ) {
 
   db.oneOrNone( addAuthor, [ name, description, image_url ])
     .then(function( author ) {
-        res.json( { author } )
-        // res.redirect( `/author-details/${author.id}` )
+        res.redirect( `/author-details/${author.id}` )
       })
 })
 

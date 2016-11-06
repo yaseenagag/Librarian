@@ -1,0 +1,11 @@
+extends layout
+
+block content
+  div
+    h4=author.title
+    p=author.description
+    a.btn.btn-success( type="button" href='/updateBook/' + author.id ) UpdateBook
+
+    a.btn.btn-danger( href='/deleteBook/' + author.id ) Delete Book
+    div
+      img( src=author.image_url )
