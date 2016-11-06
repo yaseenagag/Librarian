@@ -68,8 +68,13 @@ router.get('/book-details/:book_id', function( req, res ) {
     const [ book, book_author ] = results
     // const book = results[0]
     // const book_author = results[1]
-    Promise.resolve( db.oneOrNone( getAuthorById, [ book_author.author_id ] ) )
+
+    if ( book_author ) {
+      Promise.resolve( db.oneOrNone( getAuthorById, [ book_author.author_id ] ) )
       .then( author => res.render( 'book_details', { book, author } ) )
+    } else {
+      res.render( 'book_details', { book, author: { name: 'No Author Found' } } )
+    }
   })
 })
 
@@ -85,14 +90,18 @@ router.get('/author-details/:author_id', function( req, res ) {
 router.get('/updateBook/:book_id', function ( req, res ) {
   const { book_id } = req.params
 
-  db.oneOrNone( getBookById, [ book_id ] )
-    .then( book => res.render( 'updateBook', { book } ) )
+  Promise.all([
+    db.oneOrNone( getBookById, [ book_id ] ),
+    db.any( getAllAuthors )
+  ]).then( results => {
+    const [ book, authors ] = results
+
+    res.render( 'updateBook', { book, authors } )
+  })
 })
 
 router.post('/updateBook', function ( req, res ) {
-  const { book_id, title, description, image_url } = req.body
-
-  console.log( 'Updated Books', req.body )
+  const { book_id, title, description, image_url} = req.body
 
   db.oneOrNone( updateBook, [ title, description, image_url, book_id ] )
     .then( book => res.redirect( `/book-details/${book.id}` ) )
